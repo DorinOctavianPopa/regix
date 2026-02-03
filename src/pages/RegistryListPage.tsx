@@ -20,6 +20,7 @@ const RegistryListPage: React.FC = () => {
 
   useEffect(() => {
     loadRegistries();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const loadRegistries = async () => {

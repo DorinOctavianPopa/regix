@@ -12,7 +12,6 @@ import {
   ColumnMapping,
   RegistryFilter,
 } from '../types/registry.types';
-import { useAuth } from '../contexts/AuthContext';
 import { logger } from '../utils/logger';
 import DataGrid from '../components/DataGrid';
 import './RegistryDetailPage.css';
@@ -27,10 +26,8 @@ const RegistryDetailPage: React.FC = () => {
   const [totalCount, setTotalCount] = useState(0);
   const [currentPage, setCurrentPage] = useState(1);
   const [selectedYear, setSelectedYear] = useState<number | undefined>();
-  const [selectedDepartment, setSelectedDepartment] = useState<string | undefined>();
   const [sortBy, setSortBy] = useState<string | undefined>();
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
-  const { user } = useAuth();
   const navigate = useNavigate();
 
   const pageSize = 50;
@@ -39,7 +36,8 @@ const RegistryDetailPage: React.FC = () => {
     if (registryId) {
       loadRegistryData();
     }
-  }, [registryId, currentPage, selectedYear, selectedDepartment, sortBy, sortOrder]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [registryId, currentPage, selectedYear, sortBy, sortOrder]);
 
   const loadRegistryData = async () => {
     if (!registryId) return;
@@ -63,7 +61,6 @@ const RegistryDetailPage: React.FC = () => {
         page: currentPage,
         pageSize,
         year: selectedYear,
-        departmentId: selectedDepartment,
         sortBy,
         sortOrder,
       };

@@ -28,6 +28,7 @@ const DashboardPage: React.FC = () => {
     if (isAuthenticated) {
       loadRegistries();
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isAuthenticated]);
 
   const loadRegistries = async () => {

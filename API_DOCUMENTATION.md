@@ -160,7 +160,7 @@ Access-Control-Allow-Credentials: true
 
 ## Database Schema
 
-The backend uses Microsoft SQL Server with the following authentication-related tables:
+The backend uses Microsoft SQL Server with the following tables:
 
 ### Users Table
 ```sql
@@ -169,8 +169,68 @@ CREATE TABLE Users (
     Username NVARCHAR(256) NOT NULL UNIQUE,
     Email NVARCHAR(256) NOT NULL,
     PasswordHash NVARCHAR(MAX) NOT NULL,
+    DepartmentId NVARCHAR(450) NOT NULL,
+    IsAdmin BIT DEFAULT 0,
     Created DATETIME2 DEFAULT GETDATE(),
-    Modified DATETIME2 DEFAULT GETDATE()
+    Modified DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (DepartmentId) REFERENCES Departments(Id)
+)
+```
+
+### Departments Table
+```sql
+CREATE TABLE Departments (
+    Id NVARCHAR(450) PRIMARY KEY,
+    Name NVARCHAR(256) NOT NULL UNIQUE,
+    Description NVARCHAR(MAX),
+    Created DATETIME2 DEFAULT GETDATE()
+)
+```
+
+### Registries Table
+```sql
+CREATE TABLE Registries (
+    Id NVARCHAR(450) PRIMARY KEY,
+    Name NVARCHAR(256) NOT NULL,
+    Description NVARCHAR(MAX),
+    TableName NVARCHAR(256) NOT NULL,
+    DepartmentId NVARCHAR(450) NOT NULL,
+    CreatedAt DATETIME2 DEFAULT GETDATE(),
+    UpdatedAt DATETIME2 DEFAULT GETDATE(),
+    FOREIGN KEY (DepartmentId) REFERENCES Departments(Id)
+)
+```
+
+### ColumnMappings Table
+```sql
+CREATE TABLE ColumnMappings (
+    Id NVARCHAR(450) PRIMARY KEY,
+    RegistryId NVARCHAR(450) NOT NULL,
+    SqlColumnName NVARCHAR(256) NOT NULL,
+    UiColumnName NVARCHAR(256) NOT NULL,
+    DataType NVARCHAR(50) NOT NULL,
+    MaxLength INT NULL,
+    AcceptedValues NVARCHAR(MAX) NULL,
+    IsRequired BIT DEFAULT 0,
+    IsEditable BIT DEFAULT 1,
+    IsVisible BIT DEFAULT 1,
+    DisplayOrder INT DEFAULT 0,
+    FOREIGN KEY (RegistryId) REFERENCES Registries(Id)
+)
+```
+
+### UserRegistryAccess Table
+```sql
+CREATE TABLE UserRegistryAccess (
+    UserId NVARCHAR(450) NOT NULL,
+    RegistryId NVARCHAR(450) NOT NULL,
+    CanView BIT DEFAULT 1,
+    CanEdit BIT DEFAULT 0,
+    CanDelete BIT DEFAULT 0,
+    CanAdd BIT DEFAULT 0,
+    PRIMARY KEY (UserId, RegistryId),
+    FOREIGN KEY (UserId) REFERENCES Users(Id),
+    FOREIGN KEY (RegistryId) REFERENCES Registries(Id)
 )
 ```
 
@@ -190,6 +250,306 @@ CREATE TABLE UserRoles (
     PRIMARY KEY (UserId, RoleId)
 )
 ```
+
+## Registry API Endpoints
+
+### Get Accessible Registries
+
+**Endpoint:** `GET /api/registries/accessible`
+
+**Description:** Get all registries accessible to the current user based on UserRegistryAccess table.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Success Response (200 OK):**
+```json
+[
+  {
+    "id": "string",
+    "name": "string",
+    "description": "string",
+    "tableName": "string",
+    "departmentId": "string",
+    "department": {
+      "id": "string",
+      "name": "string",
+      "description": "string"
+    },
+    "createdAt": "2026-01-01T00:00:00Z",
+    "updatedAt": "2026-01-01T00:00:00Z"
+  }
+]
+```
+
+### Get All Registries (Admin)
+
+**Endpoint:** `GET /api/registries`
+
+**Description:** Get all registries in the system (admin only).
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Success Response (200 OK):** Same as accessible registries.
+
+### Get Registry by ID
+
+**Endpoint:** `GET /api/registries/{registryId}`
+
+**Description:** Get details of a specific registry.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Success Response (200 OK):** Single registry object.
+
+### Get Column Mappings
+
+**Endpoint:** `GET /api/registries/{registryId}/columns`
+
+**Description:** Get column mappings for a registry.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Success Response (200 OK):**
+```json
+[
+  {
+    "id": "string",
+    "registryId": "string",
+    "sqlColumnName": "string",
+    "uiColumnName": "string",
+    "dataType": "string|number|date|boolean|select",
+    "maxLength": 100,
+    "acceptedValues": ["value1", "value2"],
+    "isRequired": true,
+    "isEditable": true,
+    "isVisible": true,
+    "displayOrder": 1
+  }
+]
+```
+
+### Get Registry Data
+
+**Endpoint:** `GET /api/registries/{registryId}/data`
+
+**Description:** Get records from a registry with optional filtering.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Query Parameters:**
+- `departmentId` (optional): Filter by department
+- `year` (optional): Filter by year
+- `searchTerm` (optional): Search term
+- `sortBy` (optional): Column to sort by
+- `sortOrder` (optional): 'asc' or 'desc'
+- `page` (optional): Page number (default: 1)
+- `pageSize` (optional): Records per page (default: 50)
+
+**Success Response (200 OK):**
+```json
+{
+  "records": [
+    {
+      "id": "string",
+      "field1": "value1",
+      "field2": "value2"
+    }
+  ],
+  "totalCount": 100,
+  "page": 1,
+  "pageSize": 50,
+  "totalPages": 2
+}
+```
+
+### Create Registry Record
+
+**Endpoint:** `POST /api/registries/{registryId}/data`
+
+**Description:** Create a new record in a registry.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "field1": "value1",
+  "field2": "value2"
+}
+```
+
+**Success Response (201 Created):** Created record object.
+
+### Update Registry Record
+
+**Endpoint:** `PUT /api/registries/{registryId}/data/{recordId}`
+
+**Description:** Update an existing record in a registry.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "field1": "newValue1",
+  "field2": "newValue2"
+}
+```
+
+**Success Response (200 OK):** Updated record object.
+
+### Delete Registry Record
+
+**Endpoint:** `DELETE /api/registries/{registryId}/data/{recordId}`
+
+**Description:** Delete a record from a registry.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Success Response (204 No Content)**
+
+### Create Registry (Admin)
+
+**Endpoint:** `POST /api/registries`
+
+**Description:** Create a new registry (admin only).
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "string",
+  "description": "string",
+  "tableName": "string",
+  "departmentId": "string"
+}
+```
+
+**Success Response (201 Created):** Created registry object.
+
+### Update Registry (Admin)
+
+**Endpoint:** `PUT /api/registries/{registryId}`
+
+**Description:** Update a registry (admin only).
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "name": "string",
+  "description": "string",
+  "departmentId": "string"
+}
+```
+
+**Success Response (200 OK):** Updated registry object.
+
+### Delete Registry (Admin)
+
+**Endpoint:** `DELETE /api/registries/{registryId}`
+
+**Description:** Delete a registry (admin only).
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Success Response (204 No Content)**
+
+### Get User Access
+
+**Endpoint:** `GET /api/registries/access/{userId}`
+
+**Description:** Get registry access permissions for a user.
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Success Response (200 OK):**
+```json
+[
+  {
+    "userId": "string",
+    "registryId": "string",
+    "canView": true,
+    "canEdit": false,
+    "canDelete": false,
+    "canAdd": true
+  }
+]
+```
+
+### Update User Access (Admin)
+
+**Endpoint:** `PUT /api/registries/access/{userId}/{registryId}`
+
+**Description:** Update user access to a registry (admin only).
+
+**Request Headers:**
+```
+Authorization: Bearer {token}
+Content-Type: application/json
+```
+
+**Request Body:**
+```json
+{
+  "canView": true,
+  "canEdit": true,
+  "canDelete": false,
+  "canAdd": true
+}
+```
+
+**Success Response (200 OK):** Updated access object.
 
 ## Security Considerations
 

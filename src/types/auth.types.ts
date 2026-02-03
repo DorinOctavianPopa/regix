@@ -7,6 +7,9 @@ export interface User {
   username: string;
   email: string;
   roles: string[];
+  departmentId: string;
+  departmentName?: string;
+  isAdmin?: boolean;
 }
 
 export interface LoginCredentials {

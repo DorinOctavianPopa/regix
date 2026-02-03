@@ -3,15 +3,19 @@
  * Main page after successful authentication
  */
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
+import { registryService } from '../services/registry.service';
+import { Registry } from '../types/registry.types';
 import { logger } from '../utils/logger';
 import './DashboardPage.css';
 
 const DashboardPage: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
   const navigate = useNavigate();
+  const [registries, setRegistries] = useState<Registry[]>([]);
+  const [loadingRegistries, setLoadingRegistries] = useState(true);
 
   useEffect(() => {
     if (!isAuthenticated) {
@@ -19,6 +23,28 @@ const DashboardPage: React.FC = () => {
       navigate('/login');
     }
   }, [isAuthenticated, navigate]);
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      loadRegistries();
+    }
+  }, [isAuthenticated]);
+
+  const loadRegistries = async () => {
+    try {
+      setLoadingRegistries(true);
+      logger.info('Loading accessible registries for dashboard');
+      const data = user?.isAdmin
+        ? await registryService.getAllRegistries()
+        : await registryService.getAccessibleRegistries();
+      setRegistries(data);
+      logger.info('Registries loaded for dashboard', { count: data.length });
+    } catch (err) {
+      logger.error('Failed to load registries for dashboard', err);
+    } finally {
+      setLoadingRegistries(false);
+    }
+  };
 
   const handleLogout = async () => {
     try {
@@ -51,37 +77,87 @@ const DashboardPage: React.FC = () => {
       <main className="dashboard-main">
         <div className="welcome-section">
           <h2>Welcome to Records Archive System</h2>
-          <p>You have successfully authenticated and can now access the system.</p>
+          <p>You have successfully authenticated and can now access your registries.</p>
+          {user.departmentName && (
+            <p className="department-info">Department: {user.departmentName}</p>
+          )}
+        </div>
+
+        <div className="registries-section">
+          <div className="section-header">
+            <h3>Your Registries</h3>
+            <button 
+              onClick={() => navigate('/registries')}
+              className="view-all-button"
+            >
+              View All →
+            </button>
+          </div>
+          
+          {loadingRegistries ? (
+            <div className="loading-registries">
+              <div className="spinner"></div>
+              <p>Loading registries...</p>
+            </div>
+          ) : registries.length === 0 ? (
+            <div className="no-registries">
+              <p>You don't have access to any registries yet.</p>
+              {user.isAdmin && (
+                <button 
+                  onClick={() => navigate('/registries/new')}
+                  className="create-registry-button"
+                >
+                  Create Registry
+                </button>
+              )}
+            </div>
+          ) : (
+            <div className="dashboard-grid">
+              {registries.slice(0, 4).map((registry) => (
+                <div
+                  key={registry.id}
+                  className="dashboard-card"
+                  onClick={() => navigate(`/registries/${registry.id}`)}
+                >
+                  <div className="card-icon">📊</div>
+                  <h3>{registry.name}</h3>
+                  <p>{registry.description}</p>
+                  <div className="card-footer">
+                    <span className="card-meta">
+                      🏢 {registry.department?.name || 'N/A'}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="dashboard-grid">
-          <div className="dashboard-card">
+          <div className="dashboard-card" onClick={() => navigate('/registries')}>
             <div className="card-icon">📁</div>
-            <h3>Records</h3>
-            <p>View and manage archived records</p>
-            <button className="card-button">View Records</button>
+            <h3>All Registries</h3>
+            <p>View and manage all accessible registries</p>
+            <button className="card-button">View Registries</button>
           </div>
 
-          <div className="dashboard-card">
-            <div className="card-icon">🔍</div>
-            <h3>Search</h3>
-            <p>Search through archived documents</p>
-            <button className="card-button">Search</button>
-          </div>
+          {user.isAdmin && (
+            <div className="dashboard-card" onClick={() => navigate('/admin/users')}>
+              <div className="card-icon">👥</div>
+              <h3>User Management</h3>
+              <p>Manage users and permissions</p>
+              <button className="card-button">Manage Users</button>
+            </div>
+          )}
 
-          <div className="dashboard-card">
-            <div className="card-icon">📊</div>
-            <h3>Reports</h3>
-            <p>Generate and view reports</p>
-            <button className="card-button">View Reports</button>
-          </div>
-
-          <div className="dashboard-card">
-            <div className="card-icon">⚙️</div>
-            <h3>Settings</h3>
-            <p>Configure system settings</p>
-            <button className="card-button">Settings</button>
-          </div>
+          {user.isAdmin && (
+            <div className="dashboard-card" onClick={() => navigate('/admin/registries')}>
+              <div className="card-icon">⚙️</div>
+              <h3>Registry Management</h3>
+              <p>Create and configure registries</p>
+              <button className="card-button">Manage Registries</button>
+            </div>
+          )}
         </div>
 
         <div className="user-details">
@@ -100,9 +176,19 @@ const DashboardPage: React.FC = () => {
               <span>{user.email}</span>
             </div>
             <div className="info-item">
+              <label>Department:</label>
+              <span>{user.departmentName || 'N/A'}</span>
+            </div>
+            <div className="info-item">
               <label>Roles:</label>
               <span>{user.roles.join(', ')}</span>
             </div>
+            {user.isAdmin && (
+              <div className="info-item">
+                <label>Admin:</label>
+                <span>Yes ✓</span>
+              </div>
+            )}
           </div>
         </div>
       </main>

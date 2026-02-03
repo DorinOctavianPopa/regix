@@ -8,6 +8,17 @@ A modern Records Archive Application built with React and TypeScript, featuring 
 - **Bearer Token Authorization**: All API calls use Bearer Token authentication
 - **Microsoft SQL Server Backend**: Database management via SQL Server
 - **Protected Routes**: Dashboard and other features accessible only after authentication
+- **Registry Management**: Complete system for managing multiple registries
+  - User-based registry access control
+  - Department-based organization
+  - Dynamic DataGrid with sorting and filtering
+  - CRUD operations on registry records
+  - Year-based filtering
+  - Column mapping system (SQL to UI)
+- **Admin Features**: 
+  - User management
+  - Registry management
+  - Access control management
 - **Modern UI**: Clean, responsive, and user-friendly interface
 - **Comprehensive Logging**: Built-in logging for debugging and tracing
 - **Test Coverage**: Unit tests for all major components and services
@@ -26,16 +37,21 @@ A modern Records Archive Application built with React and TypeScript, featuring 
 ```
 src/
 ├── components/       # Reusable React components
-│   └── ProtectedRoute.tsx    # Route guard for authentication
+│   ├── ProtectedRoute.tsx    # Route guard for authentication
+│   └── DataGrid.tsx          # Dynamic data grid with sorting/filtering
 ├── contexts/         # React Context providers
 │   └── AuthContext.tsx       # Authentication state management
 ├── pages/           # Page components
 │   ├── LoginPage.tsx         # Login/Authentication page
-│   └── DashboardPage.tsx     # Main dashboard after login
+│   ├── DashboardPage.tsx     # Main dashboard after login
+│   ├── RegistryListPage.tsx  # List of accessible registries
+│   └── RegistryDetailPage.tsx # Registry data view with CRUD
 ├── services/        # API and external services
-│   └── auth.service.ts       # Authentication API service
+│   ├── auth.service.ts       # Authentication API service
+│   └── registry.service.ts   # Registry management API service
 ├── types/           # TypeScript type definitions
-│   └── auth.types.ts         # Authentication-related types
+│   ├── auth.types.ts         # Authentication-related types
+│   └── registry.types.ts     # Registry-related types
 ├── utils/           # Utility functions
 │   └── logger.ts             # Logging utility
 └── App.tsx          # Main application component
@@ -100,15 +116,69 @@ The optimized build will be in the `build/` folder.
 6. **Protected Access**: Dashboard and other routes require valid authentication
 7. **Token Expiry**: Invalid/expired tokens redirect users back to login
 
+## Registry System
+
+The application implements a comprehensive registry management system:
+
+### Key Concepts
+
+1. **Departments**: Users belong to departments, and registries are organized by departments
+2. **Registries**: Each registry represents a data collection with its own SQL table
+3. **Column Mappings**: Define how SQL table columns map to UI DataGrid columns
+4. **Access Control**: Users have specific permissions for each registry (view, add, edit, delete)
+5. **Dynamic DataGrid**: Displays registry data with sorting, filtering, and pagination
+
+### Registry Features
+
+- **Dashboard View**: Shows accessible registries with quick access
+- **Registry List**: Comprehensive view of all accessible registries
+- **Registry Detail**: 
+  - DataGrid with column-based filtering
+  - Sortable columns (click header to sort)
+  - Year-based filtering
+  - CRUD operations (Add, Edit, Delete records)
+  - Pagination for large datasets
+- **Admin Functions**:
+  - Create and configure registries
+  - Manage user access to registries
+  - Define column mappings
+
+### Data Flow
+
+1. User logs in and receives authentication token
+2. System loads registries accessible to the user
+3. User selects a registry to view
+4. System loads column mappings and data
+5. User can filter, sort, and perform CRUD operations
+6. All changes are persisted to the SQL Server database
+
 ## API Integration
 
 The application communicates with a backend Web API using Bearer Token authentication.
 
 ### API Endpoints
 
+#### Authentication
 - **POST** `/api/auth/login` - Authenticate user and receive token
 - **POST** `/api/auth/logout` - Logout and invalidate token
 - **GET** `/api/auth/verify` - Verify token validity
+
+#### Registries
+- **GET** `/api/registries/accessible` - Get registries accessible to current user
+- **GET** `/api/registries` - Get all registries (admin only)
+- **GET** `/api/registries/{id}` - Get specific registry details
+- **GET** `/api/registries/{id}/columns` - Get column mappings for registry
+- **GET** `/api/registries/{id}/data` - Get registry data with filtering
+- **POST** `/api/registries/{id}/data` - Create new record
+- **PUT** `/api/registries/{id}/data/{recordId}` - Update record
+- **DELETE** `/api/registries/{id}/data/{recordId}` - Delete record
+- **POST** `/api/registries` - Create new registry (admin only)
+- **PUT** `/api/registries/{id}` - Update registry (admin only)
+- **DELETE** `/api/registries/{id}` - Delete registry (admin only)
+
+#### Access Control
+- **GET** `/api/registries/access/{userId}` - Get user's registry access
+- **PUT** `/api/registries/access/{userId}/{registryId}` - Update user access (admin only)
 
 ### Request Headers
 
@@ -215,13 +285,16 @@ The application requires a backend Web API that provides:
 
 ## Future Enhancements
 
-- Records management interface
-- Search functionality
-- Report generation
-- User management
-- Role-based permissions
-- File upload and storage
-- Advanced filtering and sorting
+- Admin user interface for managing users
+- Admin interface for creating/editing registries
+- Advanced search across all registries
+- Report generation and export (PDF, Excel)
+- Audit logging for all changes
+- Bulk import/export functionality
+- Advanced filtering with multiple criteria
+- Custom views and saved filters
+- Email notifications for changes
+- File attachment support
 
 ## Support
 

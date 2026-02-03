@@ -3,8 +3,10 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+import { AuthState, LoginCredentials } from '../types/auth.types';
+// User type is used by AuthState but ESLint doesn't detect it
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
-import { AuthState, LoginCredentials, User } from '../types/auth.types';
+import type { User } from '../types/auth.types';
 import { authService } from '../services/auth.service';
 import { logger } from '../utils/logger';
 

@@ -3,6 +3,7 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 import { AuthState, LoginCredentials, User } from '../types/auth.types';
 import { authService } from '../services/auth.service';
 import { logger } from '../utils/logger';

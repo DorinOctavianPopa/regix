@@ -8,6 +8,8 @@ import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-d
 import { AuthProvider } from "./contexts/AuthContext";
 import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
+import RegistryListPage from "./pages/RegistryListPage";
+import RegistryDetailPage from "./pages/RegistryDetailPage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { logger } from "./utils/logger";
 import "./App.css";
@@ -28,8 +30,24 @@ function App() {
               </ProtectedRoute>
             }
           />
-          <Route path="/" element={<Navigate to="/login" replace />} />
-          <Route path="*" element={<Navigate to="/login" replace />} />
+          <Route
+            path="/registries"
+            element={
+              <ProtectedRoute>
+                <RegistryListPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/registries/:registryId"
+            element={
+              <ProtectedRoute>
+                <RegistryDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route path="/" element={<Navigate to="/dashboard" replace />} />
+          <Route path="*" element={<Navigate to="/dashboard" replace />} />
         </Routes>
       </AuthProvider>
     </Router>

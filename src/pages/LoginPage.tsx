@@ -3,10 +3,15 @@
  * Modern authentication interface with form validation
  */
 
-import React, { useState, FormEvent } from "react";
+import React, { useState, FormEvent, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useAuth } from "../contexts/AuthContext";
 import { logger } from "../utils/logger";
+import {
+  API_INSTANCE_OPTIONS,
+  getApiInstanceId,
+  setApiInstance,
+} from "../utils/apiConfig";
 import "./LoginPage.css";
 
 const LoginPage: React.FC = () => {
@@ -15,6 +20,15 @@ const LoginPage: React.FC = () => {
   const [localError, setLocalError] = useState("");
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
+  const defaultInstanceId =
+    getApiInstanceId() || API_INSTANCE_OPTIONS[0]?.id || "";
+  const [instanceId, setInstanceId] = useState(defaultInstanceId);
+
+  useEffect(() => {
+    if (instanceId) {
+      setApiInstance(instanceId);
+    }
+  }, [instanceId]);
 
   const handleSubmit = async (e: FormEvent) => {
     e.preventDefault();
@@ -35,7 +49,8 @@ const LoginPage: React.FC = () => {
 
     try {
       logger.info("Submitting login form", { username });
-      await login({ username, password });
+      setApiInstance(instanceId);
+      await login({ username, password, instanceId });
       logger.info("Login successful, navigating to dashboard");
       navigate("/dashboard");
     } catch (err) {
@@ -55,6 +70,22 @@ const LoginPage: React.FC = () => {
         </div>
 
         <form onSubmit={handleSubmit} className="login-form">
+          <div className="form-group">
+            <label htmlFor="instance">Instanta</label>
+            <select
+              id="instance"
+              value={instanceId}
+              onChange={(e) => setInstanceId(e.target.value)}
+              disabled={loading}
+            >
+              {API_INSTANCE_OPTIONS.map((option) => (
+                <option key={option.id} value={option.id}>
+                  {option.name}
+                </option>
+              ))}
+            </select>
+          </div>
+
           <div className="form-group">
             <label htmlFor="username">Username</label>
             <input

@@ -13,15 +13,14 @@ import {
   RegistryDataResponse,
 } from '../types/registry.types';
 import { logger } from '../utils/logger';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+import { getApiBaseUrl } from '../utils/apiConfig';
 
 class RegistryService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: getApiBaseUrl(),
       headers: {
         'Content-Type': 'application/json',
       },
@@ -30,6 +29,7 @@ class RegistryService {
     // Add request interceptor to include bearer token
     this.api.interceptors.request.use(
       (config) => {
+        config.baseURL = getApiBaseUrl();
         const token = localStorage.getItem('auth_token');
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;

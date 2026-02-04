@@ -6,23 +6,24 @@
 import axios, { AxiosInstance, AxiosError } from 'axios';
 import { LoginCredentials, AuthResponse, User } from '../types/auth.types';
 import { logger } from '../utils/logger';
-
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL || 'http://localhost:5000/api';
+import { getApiBaseUrl } from '../utils/apiConfig';
 
 class AuthService {
   private api: AxiosInstance;
 
   constructor() {
     this.api = axios.create({
-      baseURL: API_BASE_URL,
+      baseURL: getApiBaseUrl(),
       headers: {
         'Content-Type': 'application/json',
+        Accept: "application/json",
       },
     });
 
     // Add request interceptor to include bearer token
     this.api.interceptors.request.use(
       (config) => {
+        config.baseURL = getApiBaseUrl();
         const token = this.getToken();
         if (token) {
           config.headers.Authorization = `Bearer ${token}`;
@@ -63,8 +64,8 @@ class AuthService {
    */
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
-      logger.info('Attempting login', { username: credentials.username });
-      const response = await this.api.post<AuthResponse>('/auth/login', credentials);
+      logger.info('Attempting login', { username: credentials.username, instanceid: credentials.instanceId });
+      const response = await this.api.post<AuthResponse>('/ActiveDirectory/Login', credentials);
       
       const { token, user } = response.data;
       

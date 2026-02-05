@@ -3,25 +3,25 @@
  */
 
 export interface Department {
-  id: string;
+  id: number;
   name: string;
   description: string;
 }
 
 export interface Registry {
-  id: string;
+  id: number;
   name: string;
   description: string;
   tableName: string;
-  departmentId: string;
+  departmentId: number;
   department?: Department;
   createdAt: string;
   updatedAt: string;
 }
 
 export interface ColumnMapping {
-  id: string;
-  registryId: string;
+  id: number;
+  registryId: number;
   sqlColumnName: string;
   uiColumnName: string;
   dataType: 'string' | 'number' | 'date' | 'boolean' | 'select';
@@ -34,13 +34,13 @@ export interface ColumnMapping {
 }
 
 export interface RegistryRecord {
-  id: string;
+  id: number;
   [key: string]: any; // Dynamic fields based on column mappings
 }
 
 export interface UserRegistryAccess {
-  userId: string;
-  registryId: string;
+  userId: number;
+  registryId: number;
   canView: boolean;
   canEdit: boolean;
   canDelete: boolean;
@@ -48,7 +48,7 @@ export interface UserRegistryAccess {
 }
 
 export interface RegistryFilter {
-  departmentId?: string;
+  departmentId?: number;
   year?: number;
   searchTerm?: string;
   sortBy?: string;

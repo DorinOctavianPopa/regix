@@ -35,9 +35,15 @@ const DashboardPage: React.FC = () => {
     try {
       setLoadingRegistries(true);
       logger.info('Loading accessible registries for dashboard');
-      const data = user?.isAdmin
-        ? await registryService.getAllRegistries()
-        : await registryService.getAccessibleRegistries();
+      let data: Registry[] = [];
+      if (user?.isAdmin) {
+        data = await registryService.getAllRegistries();
+      } else {
+        if (!user?.id) {
+          throw new Error('User ID not available');
+        }
+        data = await registryService.getAccessibleRegistries(user.id);
+      }
       setRegistries(data);
       logger.info('Registries loaded for dashboard', { count: data.length });
     } catch (err) {
@@ -79,8 +85,8 @@ const DashboardPage: React.FC = () => {
         <div className="welcome-section">
           <h2>Welcome to Records Archive System</h2>
           <p>You have successfully authenticated and can now access your registries.</p>
-          {user.departmentName && (
-            <p className="department-info">Department: {user.departmentName}</p>
+          {user.department && (
+            <p className="department-info">Department: {user.department}</p>
           )}
         </div>
 
@@ -178,11 +184,11 @@ const DashboardPage: React.FC = () => {
             </div>
             <div className="info-item">
               <label>Department:</label>
-              <span>{user.departmentName || 'N/A'}</span>
+              <span>{user.department || 'N/A'}</span>
             </div>
             <div className="info-item">
               <label>Roles:</label>
-              <span>{user.roles.join(', ')}</span>
+              <span>{user.roles?.join(', ')}</span>
             </div>
             {user.isAdmin && (
               <div className="info-item">

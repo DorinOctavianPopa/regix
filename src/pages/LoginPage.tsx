@@ -11,6 +11,7 @@ import {
   API_INSTANCE_OPTIONS,
   getApiInstanceId,
   setApiInstance,
+  getIndex,
 } from "../utils/apiConfig";
 import "./LoginPage.css";
 
@@ -20,9 +21,10 @@ const LoginPage: React.FC = () => {
   const [localError, setLocalError] = useState("");
   const { login, loading, error } = useAuth();
   const navigate = useNavigate();
-  const defaultInstanceId =
-    getApiInstanceId() || API_INSTANCE_OPTIONS[0]?.id || "";
+  const defaultInstanceId = getApiInstanceId() || API_INSTANCE_OPTIONS[0]?.id || "";
+  const defaultIndex = getIndex() || API_INSTANCE_OPTIONS[0]?.index || 0 ;
   const [instanceId, setInstanceId] = useState(defaultInstanceId);
+  const [index, setIndex] = useState(defaultIndex);
 
   useEffect(() => {
     if (instanceId) {
@@ -48,9 +50,9 @@ const LoginPage: React.FC = () => {
     }
 
     try {
-      logger.info("Submitting login form", { username });
+      logger.info("Submitting login form", { username, instanceId, index });
       setApiInstance(instanceId);
-      await login({ username, password, instanceId });
+      await login({ username, password, instanceId, id_institutie: index });
       logger.info("Login successful, navigating to dashboard");
       navigate("/dashboard");
     } catch (err) {

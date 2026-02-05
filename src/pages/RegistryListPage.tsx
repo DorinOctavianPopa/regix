@@ -28,10 +28,15 @@ const RegistryListPage: React.FC = () => {
       setLoading(true);
       setError(null);
       logger.info('Loading accessible registries');
-      
-      const data = user?.isAdmin
-        ? await registryService.getAllRegistries()
-        : await registryService.getAccessibleRegistries();
+      let data: Registry[] = [];
+      if (user?.isAdmin) {
+        data = await registryService.getAllRegistries();
+      } else {
+        if (!user?.id) {
+          throw new Error('User ID not available');
+        }
+        data = await registryService.getAccessibleRegistries(user.id);
+      }
       
       setRegistries(data);
       logger.info('Registries loaded', { count: data.length });
@@ -44,7 +49,7 @@ const RegistryListPage: React.FC = () => {
     }
   };
 
-  const handleRegistryClick = (registryId: string) => {
+  const handleRegistryClick = (registryId: number) => {
     navigate(`/registries/${registryId}`);
   };
 

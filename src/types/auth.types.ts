@@ -6,21 +6,26 @@ export interface User {
   id: string;
   username: string;
   email: string;
+  displayName: string;
   roles: string[];
-  departmentId: string;
-  departmentName?: string;
+  groups: string[];
+  department?: string;
   isAdmin?: boolean;
 }
+
 
 export interface LoginCredentials {
   username: string;
   password: string;
   instanceId?: string;
+  id_institutie:number;  
 }
 
 export interface AuthResponse {
   token: string;
   user: User;
+  message?: string;
+  error: string;
   expiresIn: number;
 }
 

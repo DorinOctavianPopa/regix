@@ -11,19 +11,19 @@ const mockedAxios = axios as jest.Mocked<typeof axios>;
 
 describe('RegistryService', () => {
   const mockRegistry: Registry = {
-    id: '1',
+    id: 1,
     name: 'Test Registry',
     description: 'Test Description',
     tableName: 'test_table',
-    departmentId: 'dept1',
+    departmentId: 1,
     createdAt: '2026-01-01T00:00:00Z',
     updatedAt: '2026-01-01T00:00:00Z',
   };
 
   const mockColumns: ColumnMapping[] = [
     {
-      id: '1',
-      registryId: '1',
+      id: 1,
+      registryId: 1,
       sqlColumnName: 'name',
       uiColumnName: 'Name',
       dataType: 'string',
@@ -35,8 +35,8 @@ describe('RegistryService', () => {
   ];
 
   const mockRecords: RegistryRecord[] = [
-    { id: '1', name: 'Record 1' },
-    { id: '2', name: 'Record 2' },
+    { id: 1, name: 'Record 1' },
+    { id: 2 , name: 'Record 2' },
   ];
 
   beforeEach(() => {
@@ -69,9 +69,9 @@ describe('RegistryService', () => {
       const service = new (registryService.constructor as any)();
       service.api = { get: mockGet } as any;
 
-      const result = await service.getAccessibleRegistries();
+      const result = await service.getAccessibleRegistries(10);
       
-      expect(mockGet).toHaveBeenCalledWith('/registries/accessible');
+      expect(mockGet).toHaveBeenCalledWith('/registries/accessible/10');
       expect(result).toEqual([mockRegistry]);
     });
   });

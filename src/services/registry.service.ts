@@ -66,10 +66,15 @@ class RegistryService {
   /**
    * Get all registries accessible to the current user
    */
-  async getAccessibleRegistries(): Promise<Registry[]> {
+  async getAccessibleRegistries(userId: string | number): Promise<Registry[]> {
     try {
-      logger.info('Fetching accessible registries');
-      const response = await this.api.get<Registry[]>('/registries/accessible');
+      if (userId === undefined || userId === null || userId === '') {
+        throw new Error('User ID is required to fetch accessible registries');
+      }
+      logger.info('Fetching accessible registries', { userId });
+      const response = await this.api.get<Registry[]>(
+        `/Registry/Registries/Accessible/${userId}`
+      );
       logger.info('Accessible registries fetched', { count: response.data.length });
       return response.data;
     } catch (error) {
@@ -84,7 +89,7 @@ class RegistryService {
   async getAllRegistries(): Promise<Registry[]> {
     try {
       logger.info('Fetching all registries');
-      const response = await this.api.get<Registry[]>('/registries');
+      const response = await this.api.get<Registry[]>('/Registry/Registries');
       logger.info('All registries fetched', { count: response.data.length });
       return response.data;
     } catch (error) {
@@ -99,7 +104,7 @@ class RegistryService {
   async getRegistry(registryId: string): Promise<Registry> {
     try {
       logger.info('Fetching registry', { registryId });
-      const response = await this.api.get<Registry>(`/registries/${registryId}`);
+      const response = await this.api.get<Registry>(`/Registry/Registries/${registryId}`);
       return response.data;
     } catch (error) {
       logger.error('Failed to fetch registry', { registryId, error });
@@ -114,7 +119,7 @@ class RegistryService {
     try {
       logger.info('Fetching column mappings', { registryId });
       const response = await this.api.get<ColumnMapping[]>(
-        `/registries/${registryId}/columns`
+        `/Registry/Registries/${registryId}/ColumnMappings`
       );
       logger.debug('Column mappings fetched', { 
         registryId, 
@@ -195,7 +200,7 @@ class RegistryService {
   /**
    * Delete a record from a registry
    */
-  async deleteRecord(registryId: string, recordId: string): Promise<void> {
+  async deleteRecord(registryId: number, recordId: number): Promise<void> {
     try {
       logger.info('Deleting registry record', { registryId, recordId });
       await this.api.delete(`/registries/${registryId}/data/${recordId}`);

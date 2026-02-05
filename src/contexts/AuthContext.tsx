@@ -76,10 +76,10 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials): Promise<void> => {
     try {
       setAuthState((prev) => ({ ...prev, loading: true, error: null }));
-      logger.info('Starting login process', { username: credentials.username });
+      logger.info('Starting login process', { credentials });
       
       const response = await authService.login(credentials);
-      
+      logger.debug('Login response received', { response });
       setAuthState({
         isAuthenticated: true,
         user: response.user,
@@ -88,7 +88,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         error: null,
       });
       
-      logger.info('Login successful, user authenticated', { userId: response.user.id });
+      logger.info('Login successful, user authenticated', { response });
     } catch (error: any) {
       const errorMessage = error.response?.data?.message || 'Login failed. Please try again.';
       logger.error('Login failed', { error: errorMessage });

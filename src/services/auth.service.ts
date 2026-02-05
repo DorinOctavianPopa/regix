@@ -7,6 +7,7 @@ import axios, { AxiosInstance, AxiosError } from 'axios';
 import { LoginCredentials, AuthResponse, User } from '../types/auth.types';
 import { logger } from '../utils/logger';
 import { getApiBaseUrl } from '../utils/apiConfig';
+import { log } from 'console';
 
 class AuthService {
   private api: AxiosInstance;
@@ -65,15 +66,15 @@ class AuthService {
   async login(credentials: LoginCredentials): Promise<AuthResponse> {
     try {
       logger.info('Attempting login', { username: credentials.username, instanceid: credentials.instanceId });
-      const response = await this.api.post<AuthResponse>('/ActiveDirectory/Login', credentials);
-      
+      const response = await this.api.post<AuthResponse>('/ActiveDirectory/LoginReact', credentials);
+      logger.debug('Login response received', { status: response.status, data: response.data });
       const { token, user } = response.data;
       
       // Store authentication data
       localStorage.setItem('auth_token', token);
       localStorage.setItem('user', JSON.stringify(user));
       
-      logger.info('Login successful', { userId: user.id });
+      logger.info('Login successful', { userId: user?.id });
       return response.data;
     } catch (error) {
       logger.error('Login failed', error);

@@ -10,8 +10,8 @@ import { ColumnMapping, RegistryRecord } from '../types/registry.types';
 describe('DataGrid Component', () => {
   const mockColumns: ColumnMapping[] = [
     {
-      id: '1',
-      registryId: 'reg1',
+      id: 1,
+      registryId: 1,
       sqlColumnName: 'name',
       uiColumnName: 'Name',
       dataType: 'string',
@@ -21,8 +21,8 @@ describe('DataGrid Component', () => {
       displayOrder: 1,
     },
     {
-      id: '2',
-      registryId: 'reg1',
+      id: 2,
+      registryId: 1,
       sqlColumnName: 'age',
       uiColumnName: 'Age',
       dataType: 'number',
@@ -34,8 +34,8 @@ describe('DataGrid Component', () => {
   ];
 
   const mockData: RegistryRecord[] = [
-    { id: '1', name: 'John Doe', age: 30 },
-    { id: '2', name: 'Jane Smith', age: 25 },
+    { id: 1, name: 'John Doe', age: 30 },
+    { id: 2, name: 'Jane Smith', age: 25 },
   ];
 
   it('renders without crashing', () => {

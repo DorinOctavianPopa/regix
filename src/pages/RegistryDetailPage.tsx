@@ -31,6 +31,7 @@ const RegistryDetailPage: React.FC = () => {
   const navigate = useNavigate();
 
   const pageSize = 50;
+  const registryIdNumber = registryId ? Number(registryId) : undefined;
 
   useEffect(() => {
     if (registryId) {
@@ -106,7 +107,7 @@ const RegistryDetailPage: React.FC = () => {
 
     try {
       logger.info('Deleting record', { recordId: record.id });
-      await registryService.deleteRecord(registryId, record.id);
+      await registryService.deleteRecord(Number(registryId), record.id);
       logger.info('Record deleted successfully', { recordId: record.id });
       // Reload data
       loadRegistryData();

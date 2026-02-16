@@ -54,7 +54,7 @@ const DataGrid: React.FC<DataGridProps> = ({
   const filteredData = data.filter((record) => {
     return Object.entries(filterValues).every(([key, value]) => {
       if (!value) return true;
-      const recordValue = String(record[key] || '').toLowerCase();
+      const recordValue = String( record.dynamicFields[key] || '').toLowerCase();
       return recordValue.includes(value.toLowerCase());
     });
   });
@@ -137,7 +137,7 @@ const DataGrid: React.FC<DataGridProps> = ({
                 <tr key={record.id} className="datagrid-row">
                   {visibleColumns.map((column) => (
                     <td key={`${record.id}-${column.id}`} className="datagrid-cell">
-                      {formatCellValue(record[column.sqlColumnName], column.dataType)}
+                      {formatCellValue(record.dynamicFields[column.sqlColumnName], column.dataType)}
                     </td>
                   ))}
                   {(canEdit || canDelete) && (

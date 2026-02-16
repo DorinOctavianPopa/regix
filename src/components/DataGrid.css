@@ -9,12 +9,13 @@
 
 .datagrid-wrapper {
   overflow-x: auto;
-  overflow-y: auto;
-  max-height: 600px;
+  overflow-y: visible;
+  max-height: none;
 }
 
 .datagrid {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: collapse;
   font-size: 14px;
 }
@@ -85,6 +86,7 @@
 .datagrid-cell {
   padding: 12px;
   color: #333;
+  white-space: nowrap;
 }
 
 .actions-header {

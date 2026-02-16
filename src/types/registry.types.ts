@@ -35,7 +35,7 @@ export interface ColumnMapping {
 
 export interface RegistryRecord {
   id: number;
-  [key: string]: any; // Dynamic fields based on column mappings
+  dynamicFields: { [key: string]: any }; // Dynamic fields based on column mappings
 }
 
 export interface UserRegistryAccess {
@@ -54,7 +54,7 @@ export interface RegistryFilter {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
   page?: number;
-  pageSize?: number;
+  PageSize?: number;
 }
 
 export interface RegistryDataResponse {

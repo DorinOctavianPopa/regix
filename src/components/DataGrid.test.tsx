@@ -34,8 +34,8 @@ describe('DataGrid Component', () => {
   ];
 
   const mockData: RegistryRecord[] = [
-    { id: 1, name: 'John Doe', age: 30 },
-    { id: 2, name: 'Jane Smith', age: 25 },
+    { id: 1, dynamicFields: { name: 'John Doe', age: 30 } },
+    { id: 2, dynamicFields: { name: 'Jane Smith', age: 25 } },
   ];
 
   it('renders without crashing', () => {

@@ -35,8 +35,8 @@ describe('RegistryService', () => {
   ];
 
   const mockRecords: RegistryRecord[] = [
-    { id: 1, name: 'Record 1' },
-    { id: 2 , name: 'Record 2' },
+    { id: 1, dynamicFields: { name: 'Record 1' } },
+    { id: 2, dynamicFields: { name: 'Record 2' } },
   ];
 
   beforeEach(() => {

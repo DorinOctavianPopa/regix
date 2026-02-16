@@ -31,7 +31,6 @@ const RegistryDetailPage: React.FC = () => {
   const navigate = useNavigate();
 
   const pageSize = 50;
-  const registryIdNumber = registryId ? Number(registryId) : undefined;
 
   useEffect(() => {
     if (registryId) {
@@ -57,16 +56,25 @@ const RegistryDetailPage: React.FC = () => {
       setRegistry(registryData);
       setColumns(columnsData);
 
+      const defaultSortBy =
+        sortBy || columnsData.find((column) => column.isVisible)?.sqlColumnName;
+
+      if (!sortBy && defaultSortBy) {
+        setSortBy(defaultSortBy);
+      }
+
       // Load records with filters
       const filter: RegistryFilter = {
+        departmentId: registryData.departmentId,
         page: currentPage,
-        pageSize,
+        PageSize: pageSize,
         year: selectedYear,
-        sortBy,
+        sortBy: defaultSortBy,
         sortOrder,
       };
 
       const recordsData = await registryService.getRegistryData(registryId, filter);
+      
       setRecords(recordsData.records);
       setTotalCount(recordsData.totalCount);
 

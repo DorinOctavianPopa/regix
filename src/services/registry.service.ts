@@ -141,14 +141,15 @@ class RegistryService {
   ): Promise<RegistryDataResponse> {
     try {
       logger.info('Fetching registry data', { registryId, filter });
-      const response = await this.api.get<RegistryDataResponse>(
-        `/registries/${registryId}/data`,
-        { params: filter }
+      const response = await this.api.post<RegistryDataResponse>(
+        `/Registry/Registries/${registryId}/PagedRecords`,
+         filter 
       );
       logger.info('Registry data fetched', { 
         registryId, 
         recordCount: response.data.records.length,
-        totalCount: response.data.totalCount 
+        totalCount: response.data.totalCount ,
+        recordsFetched: response.data.records
       });
       return response.data;
     } catch (error) {

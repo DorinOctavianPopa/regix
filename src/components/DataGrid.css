@@ -13,6 +13,39 @@
   max-height: none;
 }
 
+.datagrid-scrollbar {
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  height: 14px;
+  overflow-x: auto;
+  overflow-y: hidden;
+  background: white;
+  border-top: 1px solid #e0e0e0;
+}
+
+.datagrid-scrollbar--top {
+  position: static;
+  height: 12px;
+  border-top: none;
+  border-bottom: 1px solid #e0e0e0;
+  background: transparent;
+  margin: 6px 0 4px;
+}
+
+.datagrid-scrollbar-row {
+  background: white;
+}
+
+.datagrid-scrollbar-cell {
+  padding: 0 12px 6px;
+  border-bottom: 1px solid #e0e0e0;
+}
+
+.datagrid-scrollbar-inner {
+  height: 1px;
+}
+
 .datagrid {
   width: max-content;
   min-width: 100%;
@@ -29,6 +62,8 @@
   top: 0;
   z-index: 10;
   border-bottom: 2px solid #5568d3;
+  overflow: wrap;
+  overflow-wrap: break-word;
 }
 
 .header-content {
@@ -87,6 +122,28 @@
   padding: 12px;
   color: #333;
   white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.datagrid-cell--checkbox {
+  text-align: center;
+}
+
+.datagrid-checkbox {
+  width: 16px;
+  height: 16px;
+}
+
+.datagrid-select {
+  width: 100%;
+  max-width: 100%;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  background: #f9f9f9;
+  color: #333;
+  font-size: 13px;
+  padding: 4px 6px;
 }
 
 .actions-header {

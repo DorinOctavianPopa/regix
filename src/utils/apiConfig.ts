@@ -5,10 +5,17 @@
 import { log } from "console";
 import { logger } from "./logger";
 
+/**
+ * Defines one selectable backend API instance configuration.
+ */
 export interface ApiInstanceOption {
+  /** Stable unique identifier for the instance option. */
   id: string;
+  /** Display name shown in selection controls. */
   name: string;
+  /** Base API URL used for HTTP requests. */
   baseUrl: string;
+  /** Numeric backend index associated with the selected instance. */
   index: number;
 }
 

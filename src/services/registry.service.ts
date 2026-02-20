@@ -123,7 +123,7 @@ class RegistryService {
       );
       logger.debug('Column mappings fetched', { 
         registryId, 
-        count: response.data.length 
+        count: response.data 
       });
       return response.data;
     } catch (error) {

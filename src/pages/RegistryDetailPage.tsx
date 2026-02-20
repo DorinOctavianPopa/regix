@@ -11,6 +11,7 @@ import {
   RegistryRecord,
   ColumnMapping,
   RegistryFilter,
+  SelectColumnItem,
 } from '../types/registry.types';
 import { logger } from '../utils/logger';
 import DataGrid from '../components/DataGrid';
@@ -30,7 +31,7 @@ const RegistryDetailPage: React.FC = () => {
   const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc');
   const navigate = useNavigate();
 
-  const pageSize = 50;
+  const pageSize = 20;
 
   useEffect(() => {
     if (registryId) {
@@ -53,9 +54,77 @@ const RegistryDetailPage: React.FC = () => {
         registryService.getColumnMappings(registryId),
       ]);
 
-      setRegistry(registryData);
-      setColumns(columnsData);
+      const normalizedColumns = columnsData.map((column) => {
+        const acceptedValuesRaw = (column as { acceptedValues?: unknown })
+          .acceptedValues;
 
+        const normalizeArray = (values: string): SelectColumnItem[] => {
+          let rawValues: unknown[] = [];
+
+          try {
+            const parsed = JSON.parse(values);
+            rawValues = Array.isArray(parsed) ? parsed : [parsed];
+          } catch (err) {
+            rawValues = values
+              .split(',')
+              .map((value) => value.trim())
+              .filter((value) => value.length > 0);
+          }
+
+          return rawValues
+            .map((value, index) => {
+              if (
+                value &&
+                typeof value === 'object' &&
+                'label' in value &&
+                'value' in value
+              ) {
+                const label = String((value as { label: unknown }).label).trim();
+                const rawValue = (value as { value: unknown }).value;
+                const numericValue =
+                  typeof rawValue === 'number'
+                    ? rawValue
+                    : Number(rawValue);
+                return {
+                  label,
+                  value: Number.isFinite(numericValue) ? numericValue : index,
+                };
+              }
+
+              const label = String(value).trim();
+              const numericValue = Number(value);
+              return {
+                label,
+                value: Number.isFinite(numericValue) ? numericValue : index,
+              };
+            })
+            .filter((item) => item.label.length > 0);
+        };
+
+        if (Array.isArray(acceptedValuesRaw)) {
+          return {
+            ...column,
+            acceptedValues: normalizeArray(JSON.stringify(acceptedValuesRaw)),
+          };
+        }
+
+        if (
+          typeof acceptedValuesRaw === 'string' &&
+          acceptedValuesRaw.trim().length > 0
+        ) {
+          return {
+            ...column,
+            acceptedValues: normalizeArray(acceptedValuesRaw),
+          };
+        }
+
+        return column;
+      });
+
+      setRegistry(registryData);
+      setColumns(normalizedColumns);
+      logger.info('Registry info and columns loaded', { registryId, columns: columnsData });
+ 
       const defaultSortBy =
         sortBy || columnsData.find((column) => column.isVisible)?.sqlColumnName;
 

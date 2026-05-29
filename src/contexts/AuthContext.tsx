@@ -79,7 +79,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       logger.info('Starting login process', { credentials });
       
       const response = await authService.login(credentials);
-      logger.debug('Login response received', { response });
+      logger.info('Login response received', { response });
       setAuthState({
         isAuthenticated: true,
         user: response.user,

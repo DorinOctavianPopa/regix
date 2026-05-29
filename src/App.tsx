@@ -10,6 +10,7 @@ import LoginPage from "./pages/LoginPage";
 import DashboardPage from "./pages/DashboardPage";
 import RegistryListPage from "./pages/RegistryListPage";
 import RegistryDetailPage from "./pages/RegistryDetailPage";
+import RegistryDefinitiveCasePage from "./pages/RegistryDefinitiveCasePage";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { logger } from "./utils/logger";
 import "./App.css";
@@ -43,6 +44,14 @@ function App() {
             element={
               <ProtectedRoute>
                 <RegistryDetailPage />
+              </ProtectedRoute>
+            }
+          />
+          <Route
+            path="/registries/definitive-cases"
+            element={
+              <ProtectedRoute>
+                <RegistryDefinitiveCasePage />
               </ProtectedRoute>
             }
           />

@@ -122,6 +122,12 @@ const RegistryDetailPage: React.FC = () => {
       });
 
       setRegistry(registryData);
+
+      if (registryData.id_intern === 1) {
+        navigate(`/registries/${registryId}/definitive-cases`, { replace: true });
+        return;
+      }
+
       setColumns(normalizedColumns);
       logger.info('Registry info and columns loaded', { registryId, columns: columnsData });
  
@@ -260,6 +266,12 @@ const RegistryDetailPage: React.FC = () => {
         </div>
         <button onClick={handleAddRecord} className="add-button">
           + Add Record
+        </button>
+        <button
+          onClick={() => navigate(`/registries/${registryId}/definitive-cases`)}
+          className="add-button"
+        >
+          Definitive Cases Grid
         </button>
       </header>
 

@@ -247,6 +247,30 @@
   font-size: 14px;
 }
 
+.registry-preview-card {
+  padding: 20px;
+}
+
+.registry-preview-card .card-icon {
+  font-size: 36px;
+  margin-bottom: 10px;
+}
+
+.registry-preview-card h3 {
+  font-size: 17px;
+  margin: 0 0 8px 0;
+}
+
+.registry-preview-card p {
+  font-size: 13px;
+  margin: 0 0 12px 0;
+}
+
+.registry-preview-card .card-footer {
+  margin-top: 8px;
+  padding-top: 8px;
+}
+
 .card-button {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   color: white;

@@ -49,8 +49,13 @@ const RegistryListPage: React.FC = () => {
     }
   };
 
-  const handleRegistryClick = (registryId: number) => {
-    navigate(`/registries/${registryId}`);
+  const handleRegistryClick = (registry: Registry) => {
+    const targetPath =
+      registry.id_intern === 1
+        ? `/registries/${registry.id}/definitive-cases`
+        : `/registries/${registry.id}`;
+
+    navigate(targetPath);
   };
 
   const handleCreateRegistry = () => {
@@ -109,7 +114,7 @@ const RegistryListPage: React.FC = () => {
             <div
               key={registry.id}
               className="registry-card"
-              onClick={() => handleRegistryClick(registry.id)}
+              onClick={() => handleRegistryClick(registry)}
             >
               <div className="registry-icon">📊</div>
               <h3 className="registry-name">{registry.name}</h3>

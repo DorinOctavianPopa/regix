@@ -34,6 +34,8 @@ export interface Registry {
   createdAt: string;
   /** ISO timestamp when the registry was last updated. */
   updatedAt: string;
+   /** Unique internal registry identifier. */
+  id_intern: number;
 }
 
 /**

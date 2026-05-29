@@ -9,7 +9,7 @@ import { useAuth } from '../contexts/AuthContext';
 import { registryService } from '../services/registry.service';
 import { Registry } from '../types/registry.types';
 import { logger } from '../utils/logger';
-import './DashboardPage.css';
+import  './DashboardPage.css';
 
 const DashboardPage: React.FC = () => {
   const { user, logout, isAuthenticated } = useAuth();
@@ -45,7 +45,7 @@ const DashboardPage: React.FC = () => {
         data = await registryService.getAccessibleRegistries(user.id);
       }
       setRegistries(data);
-      logger.info('Registries loaded for dashboard', { count: data.length });
+      logger.info('Registries loaded for dashboard', { count: data });
     } catch (err) {
       logger.error('Failed to load registries for dashboard', err);
     } finally {
@@ -61,6 +61,12 @@ const DashboardPage: React.FC = () => {
     } catch (error) {
       logger.error('Logout failed from dashboard', error);
     }
+  };
+
+  const getRegistryPath = (registry: Registry) => {
+    return registry.id_intern === 1
+      ? `/registries/definitive-cases`
+      : `/registries/${registry.id}`;
   };
 
   if (!user) {
@@ -123,8 +129,8 @@ const DashboardPage: React.FC = () => {
               {registries.slice(0, 4).map((registry) => (
                 <div
                   key={registry.id}
-                  className="dashboard-card"
-                  onClick={() => navigate(`/registries/${registry.id}`)}
+                  className="dashboard-card registry-preview-card"
+                  onClick={() => navigate(getRegistryPath(registry))}
                 >
                   <div className="card-icon">📊</div>
                   <h3>{registry.name}</h3>

@@ -12,6 +12,10 @@ import {
   RegistryFilter,
   RegistryDataResponse,
 } from '../types/registry.types';
+import {
+  RegistryDefinitiveCaseDataResponse,
+  RegistryDefinitiveCaseFilter,
+} from '../types/reghotdef.types';
 import { logger } from '../utils/logger';
 import { getApiBaseUrl } from '../utils/apiConfig';
 
@@ -154,6 +158,36 @@ class RegistryService {
       return response.data;
     } catch (error) {
       logger.error('Failed to fetch registry data', { registryId, error });
+      throw error;
+    }
+  }
+
+  /**
+   * Get definitive case registry records in paged format.
+   */
+  async getDefinitiveCaseRecords(
+    filter: RegistryDefinitiveCaseFilter = {}
+  ): Promise<RegistryDefinitiveCaseDataResponse> {
+    try {
+      logger.info('Fetching definitive case records', { filter });
+      const response = await this.api.post<RegistryDefinitiveCaseDataResponse>(
+        `/Registry/Registries/DefinitiveCaseRecords/Paged`,
+        filter
+      );
+
+      logger.info('Definitive case records fetched', {
+        page: response.data.page,
+        pageSize: response.data.pageSize,
+        totalCount: response.data.totalCount,
+        pageRecords: response.data.records.length,
+      });
+
+      return response.data;
+    } catch (error) {
+      logger.error('Failed to fetch definitive case records', {
+        filter,
+        error,
+      });
       throw error;
     }
   }

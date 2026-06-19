@@ -165,27 +165,121 @@ class RegistryService {
   /**
    * Get definitive case registry records in paged format.
    */
+  async getDefinitiveCaseObjectTypes(): Promise<number[]> {
+    const endpoint = '/Registry/DefinitiveCaseObjectTypes';
+
+    try {
+      logger.info('Fetching definitive case object type options', { endpoint });
+
+      const response = await this.api.get<Array<number | { id: number }>>(endpoint);
+      const options = response.data
+        .map((item) => (typeof item === 'number' ? item : Number(item.id)))
+        .filter((value) => Number.isFinite(value));
+
+      const uniqueSorted = Array.from(new Set(options)).sort((a, b) => a - b);
+
+      logger.info('Definitive case object type options fetched', {
+        endpoint,
+        count: uniqueSorted.length,
+      });
+
+      return uniqueSorted;
+    } catch (error) {
+      logger.warn('Primary definitive case object type endpoint failed; falling back to paged records extraction', {
+        endpoint,
+      });
+
+      const fallbackResponse = await this.getDefinitiveCaseRecords({
+        page: 1,
+        pageSize: 1000,
+        sortBy: 'id_type_object',
+        sortOrder: 'asc',
+      });
+
+      const fallbackOptions = fallbackResponse.records
+        .map((record) => Number(record.id_type_object))
+        .filter((value) => Number.isFinite(value));
+
+      const uniqueSorted = Array.from(new Set(fallbackOptions)).sort((a, b) => a - b);
+
+      logger.info('Definitive case object type options extracted from paged records', {
+        count: uniqueSorted.length,
+        page: fallbackResponse.page,
+        pageSize: fallbackResponse.pageSize,
+      });
+
+      return uniqueSorted;
+    }
+  }
+
+  /**
+   * Get definitive case registry records in paged format.
+   */
   async getDefinitiveCaseRecords(
     filter: RegistryDefinitiveCaseFilter = {}
   ): Promise<RegistryDefinitiveCaseDataResponse> {
+    const requestStartedAt = Date.now();
+    const endpoint = '/Registry/DefinitiveCaseRecordsPaged';
+    const effectiveFilter = {
+      page: filter.page ?? 1,
+      pageSize: filter.pageSize ?? null,
+      startDate: filter.startDate ?? null,
+      endDate: filter.endDate ?? null,
+      idTypeObjectCount: filter.idTypeObjects,
+      sortBy: filter.sortBy ?? null,
+      sortOrder: filter.sortOrder ?? null,
+    };
+
     try {
-      logger.info('Fetching definitive case records', { filter });
+      logger.info('Fetching definitive case records', {
+        endpoint,
+        filter,
+      });
+      logger.debug('Definitive case request metadata', {
+        endpoint,
+        effectiveFilter,
+        hasObjectTypeFilter: (filter.idTypeObjects?.length ?? 0) > 0,
+      });
+
       const response = await this.api.post<RegistryDefinitiveCaseDataResponse>(
-        `/Registry/Registries/DefinitiveCaseRecords/Paged`,
+        endpoint,
         filter
       );
+
+      const elapsedMs = Date.now() - requestStartedAt;
+      const firstRecord = response.data.records[0];
 
       logger.info('Definitive case records fetched', {
         page: response.data.page,
         pageSize: response.data.pageSize,
         totalCount: response.data.totalCount,
         pageRecords: response.data.records.length,
+        elapsedMs,
+      });
+
+      logger.debug('Definitive case response diagnostics', {
+        endpoint,
+        elapsedMs,
+        totalPages: response.data.totalPages,
+        firstRecordPreview: firstRecord
+          ? {
+              id: firstRecord.id,
+              caseNumber: firstRecord.caseNumber,
+              id_type_object: firstRecord.id_type_object,
+              finalDecisionDate: firstRecord.finalDecisionDate,
+              lastDateInternalCircuit: firstRecord.lastDateInternalCircuit,
+            }
+          : null,
       });
 
       return response.data;
     } catch (error) {
+      const elapsedMs = Date.now() - requestStartedAt;
       logger.error('Failed to fetch definitive case records', {
+        endpoint,
         filter,
+        effectiveFilter,
+        elapsedMs,
         error,
       });
       throw error;

@@ -8,9 +8,13 @@ import './RegistryDefinitiveCasePage.css';
 const BACKEND_PAGE_SIZE = 500;
 const DEFAULT_PAGE_SIZE = 20;
 
-const parseDate = (value: string): Date | null => {
+const parseDate = (value: string | Date | null | undefined): Date | null => {
   if (!value) {
     return null;
+  }
+
+  if (value instanceof Date) {
+    return Number.isNaN(value.getTime()) ? null : value;
   }
 
   const date = new Date(value);
@@ -21,7 +25,7 @@ const parseDate = (value: string): Date | null => {
   return date;
 };
 
-const formatDate = (value: string): string => {
+const formatDate = (value: string | Date | null | undefined): string => {
   const date = parseDate(value);
   if (!date) {
     return '-';
@@ -58,7 +62,7 @@ const RegistryDefinitiveCasePage: React.FC = () => {
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedObjectTypes, setSelectedObjectTypes] = useState<number[]>([]);
+  const [selectedObjectTypes, setSelectedObjectTypes] = useState<number[]>([3777]);
   const [currentPage, setCurrentPage] = useState(1);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
 
@@ -71,6 +75,7 @@ const RegistryDefinitiveCasePage: React.FC = () => {
         let page = 1;
         let totalCount = 0;
         let hasMore = true;
+        const currentDate = new Date().toISOString().slice(0, 10);
         const all: RegistryDefinitiveCaseRecord[] = [];
 
         while (hasMore) {
@@ -85,10 +90,9 @@ const RegistryDefinitiveCasePage: React.FC = () => {
           const response = await registryService.getDefinitiveCaseRecords({
             page,
             pageSize: BACKEND_PAGE_SIZE,
-            startDate: startDate || undefined,
-            endDate: endDate || undefined,
-            idTypeObject:
-              selectedObjectTypes.length > 0 ? selectedObjectTypes : undefined,
+            startDate: startDate || currentDate,
+            endDate: endDate || currentDate,
+            idTypeObjects:selectedObjectTypes,
             sortBy: 'finalDecisionDate',
             sortOrder: 'desc',
           });
@@ -121,6 +125,10 @@ const RegistryDefinitiveCasePage: React.FC = () => {
             id: toNumber(record.id),
             id_type_object: toNumber(record.id_type_object),
             lastIdInternalCircuit: toNumber(record.lastIdInternalCircuit),
+            finalDecisionDate:
+              parseDate(record.finalDecisionDate) ?? new Date(Number.NaN),
+            lastDateInternalCircuit:
+              parseDate(record.lastDateInternalCircuit) ?? new Date(Number.NaN),
           }))
         );
         logger.info('Definitive case records loaded', {
@@ -240,13 +248,13 @@ const RegistryDefinitiveCasePage: React.FC = () => {
             record.lastDescriptionInternalCircuit
           )}</td><td>${escapeHtml(
             formatDate(record.lastDateInternalCircuit)
-          )}</td><td>${escapeHtml(
-            formatDate(record.createdAt)
-          )}</td><td>${escapeHtml(formatDate(record.updatedAt))}</td></tr>`
+          )}</td><td>${escapeHtml(record.type_object_name || '-')}</td><td>${escapeHtml(
+            formatDate(record.updatedAt)
+          )}</td></tr>`
       )
       .join('');
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table border="1"><thead><tr><th>ID</th><th>Case Number</th><th>ID Type Object</th><th>Last Internal Circuit ID</th><th>Final Decision Date</th><th>Last Internal Circuit Description</th><th>Last Internal Circuit Date</th><th>Created At</th><th>Updated At</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table border="1"><thead><tr><th>ID</th><th>Case Number</th><th>ID Type Object</th><th>Last Internal Circuit ID</th><th>Final Decision Date</th><th>Last Internal Circuit Description</th><th>Last Internal Circuit Date</th><th>Type Object Name</th><th>Updated At</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
 
     const blob = new Blob([html], {
       type: 'application/vnd.ms-excel;charset=utf-8;',
@@ -398,20 +406,7 @@ const RegistryDefinitiveCasePage: React.FC = () => {
             ))}
           </select>
         </div>
-
-        <div className="filter-field">
-          <label htmlFor="pageSize">Rows per page</label>
-          <select
-            id="pageSize"
-            value={pageSize}
-            onChange={(e) => setPageSize(Number(e.target.value))}
-          >
-            <option value={10}>10</option>
-            <option value={20}>20</option>
-            <option value={50}>50</option>
-            <option value={100}>100</option>
-          </select>
-        </div>
+        
       </section>
 
       <section className="summary-row">
@@ -434,7 +429,7 @@ const RegistryDefinitiveCasePage: React.FC = () => {
                 <th>Final Decision Date</th>
                 <th>Last Internal Circuit Description</th>
                 <th>Last Internal Circuit Date</th>
-                <th>Created At</th>
+                <th>Type Object Name</th>
                 <th>Updated At</th>
               </tr>
             </thead>
@@ -455,7 +450,7 @@ const RegistryDefinitiveCasePage: React.FC = () => {
                     <td>{formatDate(record.finalDecisionDate)}</td>
                     <td>{record.lastDescriptionInternalCircuit || '-'}</td>
                     <td>{formatDate(record.lastDateInternalCircuit)}</td>
-                    <td>{formatDate(record.createdAt)}</td>
+                    <td>{record.type_object_name || '-'}</td>
                     <td>{formatDate(record.updatedAt)}</td>
                   </tr>
                 ))

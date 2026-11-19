@@ -250,10 +250,7 @@ class RegistryService {
       const firstRecord = response.data.records[0];
 
       logger.info('Definitive case records fetched', {
-        page: response.data.page,
-        pageSize: response.data.pageSize,
-        totalCount: response.data.totalCount,
-        pageRecords: response.data.records.length,
+        response,
         elapsedMs,
       });
 

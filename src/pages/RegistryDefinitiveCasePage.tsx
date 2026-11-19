@@ -62,9 +62,9 @@ const RegistryDefinitiveCasePage: React.FC = () => {
 
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
-  const [selectedObjectTypes, setSelectedObjectTypes] = useState<number[]>([3777]);
+  const [selectedObjectTypes] = useState<number[]>([3777]);
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_SIZE);
+  const pageSize = DEFAULT_PAGE_SIZE;
 
   useEffect(() => {
     const loadRecords = async () => {
@@ -92,7 +92,8 @@ const RegistryDefinitiveCasePage: React.FC = () => {
             pageSize: BACKEND_PAGE_SIZE,
             startDate: startDate || currentDate,
             endDate: endDate || currentDate,
-            idTypeObjects:selectedObjectTypes,
+            idTypeObjects:
+              selectedObjectTypes.length > 0 ? selectedObjectTypes : undefined,
             sortBy: 'finalDecisionDate',
             sortOrder: 'desc',
           });
@@ -147,12 +148,6 @@ const RegistryDefinitiveCasePage: React.FC = () => {
     loadRecords();
   }, [startDate, endDate, selectedObjectTypes]);
 
-  const objectTypeOptions = useMemo(() => {
-    return Array.from(new Set(records.map((item) => item.id_type_object))).sort(
-      (a, b) => a - b
-    );
-  }, [records]);
-
   const filteredRecords = useMemo(() => {
     const start = startDate ? parseDate(startDate) : null;
     const end = endDate ? parseDate(endDate) : null;
@@ -172,16 +167,9 @@ const RegistryDefinitiveCasePage: React.FC = () => {
         return false;
       }
 
-      if (
-        selectedObjectTypes.length > 0 &&
-        !selectedObjectTypes.includes(record.id_type_object)
-      ) {
-        return false;
-      }
-
       return true;
     });
-  }, [records, selectedObjectTypes, startDate, endDate]);
+  }, [records, startDate, endDate]);
 
   useEffect(() => {
     logger.debug('Definitive records filters changed', {
@@ -248,13 +236,13 @@ const RegistryDefinitiveCasePage: React.FC = () => {
             record.lastDescriptionInternalCircuit
           )}</td><td>${escapeHtml(
             formatDate(record.lastDateInternalCircuit)
-          )}</td><td>${escapeHtml(record.type_object_name || '-')}</td><td>${escapeHtml(
+          )}</td><td>${escapeHtml(record.typeObjectName || '-')}</td><td>${escapeHtml(
             formatDate(record.updatedAt)
           )}</td></tr>`
       )
       .join('');
 
-    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table border="1"><thead><tr><th>ID</th><th>Case Number</th><th>ID Type Object</th><th>Last Internal Circuit ID</th><th>Final Decision Date</th><th>Last Internal Circuit Description</th><th>Last Internal Circuit Date</th><th>Type Object Name</th><th>Updated At</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
+    const html = `<!DOCTYPE html><html><head><meta charset="UTF-8" /></head><body><table border="1"><thead><tr><th>ID</th><th>Numar dosar</th><th>ID Tip Obiect</th><th>ID Ultim Circuit Intern</th><th>Data Deciziei Finale</th><th>Descriere Ultim Circuit Intern</th><th>Data Ultim Circuit Intern</th><th>Nume Tip Obiect</th><th>Actualizat La</th></tr></thead><tbody>${rows}</tbody></table></body></html>`;
 
     const blob = new Blob([html], {
       type: 'application/vnd.ms-excel;charset=utf-8;',
@@ -314,18 +302,6 @@ const RegistryDefinitiveCasePage: React.FC = () => {
     logger.info('Print command sent for definitive records', {
       printedRows: filteredRecords.length,
     });
-  };
-
-  const handleObjectTypeChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-    const selected = Array.from(e.target.selectedOptions).map((option) =>
-      Number(option.value)
-    );
-
-    logger.debug('Updated id_type_object multi-select filter', {
-      selected,
-    });
-
-    setSelectedObjectTypes(selected);
   };
 
   if (loading) {
@@ -390,23 +366,6 @@ const RegistryDefinitiveCasePage: React.FC = () => {
           />
         </div>
 
-        <div className="filter-field filter-field--multi">
-          <label htmlFor="idTypeObject">ID Type Object (multi-select)</label>
-          <select
-            id="idTypeObject"
-            multiple
-            value={selectedObjectTypes.map(String)}
-            onChange={handleObjectTypeChange}
-            size={5}
-          >
-            {objectTypeOptions.map((option) => (
-              <option key={option} value={option}>
-                {option}
-              </option>
-            ))}
-          </select>
-        </div>
-        
       </section>
 
       <section className="summary-row">
@@ -421,16 +380,12 @@ const RegistryDefinitiveCasePage: React.FC = () => {
         <div className="table-wrapper">
           <table className="records-table">
             <thead>
-              <tr>
-                <th>ID</th>
-                <th>Case Number</th>
-                <th>ID Type Object</th>
-                <th>Last Internal Circuit ID</th>
-                <th>Final Decision Date</th>
-                <th>Last Internal Circuit Description</th>
-                <th>Last Internal Circuit Date</th>
-                <th>Type Object Name</th>
-                <th>Updated At</th>
+              <tr>                
+                <th>Numar dosar</th>
+                <th>Tip Obiect dosar</th>
+                <th>Data Deciziei Finale</th>
+                <th>Descriere Ultim Circuit Intern</th>
+                <th>Data Ultim Circuit Intern</th>
               </tr>
             </thead>
             <tbody>
@@ -443,15 +398,11 @@ const RegistryDefinitiveCasePage: React.FC = () => {
               ) : (
                 pagedRecords.map((record) => (
                   <tr key={record.id}>
-                    <td>{record.id}</td>
                     <td>{record.caseNumber || '-'}</td>
-                    <td>{record.id_type_object}</td>
-                    <td>{record.lastIdInternalCircuit}</td>
+                    <td>{record.typeObjectName}</td>
                     <td>{formatDate(record.finalDecisionDate)}</td>
                     <td>{record.lastDescriptionInternalCircuit || '-'}</td>
                     <td>{formatDate(record.lastDateInternalCircuit)}</td>
-                    <td>{record.type_object_name || '-'}</td>
-                    <td>{formatDate(record.updatedAt)}</td>
                   </tr>
                 ))
               )}

@@ -19,7 +19,7 @@ export interface RegistryDefinitiveCaseRecord {
     /**
      * Name of the object type, included for convenience to avoid additional lookups.
      */
-    type_object_name: string;
+    typeObjectName: string;
     updatedAt: string;  
 }
 

@@ -223,6 +223,7 @@ const RegistryDefinitiveCasePage: React.FC = () => {
       logger.warn('Skipping XLS export because there are no filtered records', {
         selectedObjectTypes,
       });
+      return;
     }
 
     const rows = filteredRecords
@@ -253,10 +254,13 @@ const RegistryDefinitiveCasePage: React.FC = () => {
       .slice(0, 10)}.xls`;
 
     const link = document.createElement('a');
-    link.href = URL.createObjectURL(blob);
+    const objectUrl = URL.createObjectURL(blob);
+    link.href = objectUrl;
     link.download = fileName;
+    document.body.appendChild(link);
     link.click();
-    URL.revokeObjectURL(link.href);
+    link.remove();
+    window.setTimeout(() => URL.revokeObjectURL(objectUrl), 1000);
 
     logger.info('Definitive records XLS export completed', {
       fileName,
